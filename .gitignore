@@ -2,6 +2,8 @@ __pycache__
 .venv
 .mypy_cache
 
+package/
+
 server/frontend/node_modules
 server/frontend/dist
 server/frontend/.env
