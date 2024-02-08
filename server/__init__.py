@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Type
 
 from nxtools import logging
 
@@ -14,12 +14,6 @@ from .site_settings import ExampleSiteSettings
 
 
 class ExampleAddon(BaseServerAddon):
-    # Name, title and version won't be required here - they will be
-    # automatically read from the addon's package.py file.
-    name = "example"
-    title = "Example addon"
-    version = "2.0.0"
-
     settings_model: Type[ExampleSettings] = ExampleSettings
     site_settings_model: Type[ExampleSiteSettings] = ExampleSiteSettings
 
@@ -29,8 +23,7 @@ class ExampleAddon(BaseServerAddon):
     # to show the project hierarchy sidebar. This feature is not yet
     # fully functional and will be changed in the future.
 
-    frontend_scopes: dict[str, Any] = {"project": {"sidebar": "hierarchy"}}
-    services = {"SplinesReticulator": {"image": "bfirsh/reticulate-splines"}}
+    frontend_scopes: dict[str, dict[str, str]] = {"project": {"sidebar": "hierarchy"}}
 
     # intitalize method is called during the addon initialization
     # You can use it to register its custom REST endpoints
