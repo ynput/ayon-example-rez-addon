@@ -334,12 +334,14 @@ def create_server_package(output_dir: str, addon_output_dir: str, log: logging.L
             if not filenames:
                 continue
 
-            dst_root = "."
+            dst_root = None
             if root != addon_output_dir:
-                dst_root = os.path.join(dst_root, root[addon_output_dir_offset:])
+                dst_root = root[addon_output_dir_offset:]
             for filename in filenames:
                 src_path = os.path.join(root, filename)
-                dst_path = os.path.join(dst_root, filename)
+                dst_path = filename
+                if dst_root:
+                    dst_path = os.path.join(dst_root, dst_path)
                 zipf.write(src_path, dst_path)
 
     log.info(f"Output package can be found: {output_path}")
