@@ -43,6 +43,10 @@ ADDON_VERSION: str = package.version
 ADDON_CLIENT_DIR: Union[str, None] = None
 if hasattr(package, "client_dir"):
     ADDON_CLIENT_DIR = package.client_dir
+CLIENT_VERSION_CONTENT = '''# -*- coding: utf-8 -*-
+"""Package declaring {} addon version."""
+__version__ = "{}"
+'''
 
 
 # Patterns of directories to be skipped for server part of addon
@@ -252,6 +256,30 @@ def _get_client_code_path(current_dir: str):
     return os.path.join(current_dir, "client", ADDON_CLIENT_DIR)
 
 
+def _update_client_version(current_dir, log):
+    """Make sure version.py in client code does contain correct version.
+
+    The content of the file is defined by 'CLIENT_VERSION_CONTENT'. Is skipped
+        if 'version.py' file does not exist.
+
+    Args:
+        current_dir (str): Directory path of addon source.
+        log (logging.Logger): Logger object.
+    """
+
+    client_code_dir = _get_client_code_path(current_dir)
+    version_file = os.path.join(client_code_dir, "version.py")
+    if not os.path.exists(version_file):
+        log.info("Client does not contain 'version.py' file.")
+        return
+
+    with open(version_file, "w") as stream:
+        stream.write(
+            CLIENT_VERSION_CONTENT.format(ADDON_NAME, ADDON_VERSION)
+        )
+    log.info(f"Client 'version.py' updated to '{ADDON_VERSION}'")
+
+
 def _get_client_zip_content(current_dir: str, log: logging.Logger):
     """
 
@@ -301,6 +329,7 @@ def zip_client_side(addon_package_dir: str, current_dir: str, log: logging.Logge
     if not os.path.exists(private_dir):
         os.makedirs(private_dir)
 
+    _update_client_version(current_dir, log)
     mapping = _get_client_zip_content(current_dir, log)
 
     zip_filepath: str = os.path.join(os.path.join(private_dir, "client.zip"))
@@ -373,6 +402,7 @@ def copy_client_code(current_dir: str, output_dir: str, log: logging.Logger):
         raise RuntimeError(f"Failed to remove target folder '{full_output_dir}'")
 
     os.makedirs(output_dir, exist_ok=True)
+    _update_client_version(client_code_dir, log)
     mapping = _get_client_zip_content(current_dir, log)
     for src_path, dst_path in mapping:
         full_dst_path = os.path.join(output_dir, dst_path)
