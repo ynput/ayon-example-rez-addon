@@ -218,6 +218,10 @@ def copy_frontend_content(addon_output_dir: str, current_dir: str, log: logging.
     filepaths_to_copy: list[tuple[str, str]] = []
 
     frontend_dirpath: str = os.path.join(current_dir, "frontend")
+    if not os.path.exists(frontend_dirpath):
+        log.info("Frontend directory was not found. Skipping")
+        return
+
     frontend_dist_dirpath: str = os.path.join(frontend_dirpath, "dist")
 
     if os.path.exists(os.path.join(frontend_dirpath, "package.json")):
