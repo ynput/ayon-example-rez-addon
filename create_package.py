@@ -285,6 +285,10 @@ def zip_client_side(addon_package_dir: str, current_dir: str, log: logging.Logge
         log (logging.Logger): Logger object.
     """
 
+    if not ADDON_CLIENT_DIR:
+        log.info("Client directory was not defined. Skipping")
+        return
+
     client_code_dir: str = _get_client_code_path(current_dir)
     if not os.path.isdir(client_code_dir):
         raise RuntimeError(
@@ -418,9 +422,7 @@ def main(
         safe_copy_file(src_package_file, dst_package_file)
         copy_server_content(addon_output_dir, current_dir, log)
         copy_frontend_content(addon_output_dir, current_dir, log)
-
-        if ADDON_CLIENT_DIR:
-            zip_client_side(addon_output_dir, current_dir, log)
+        zip_client_side(addon_output_dir, current_dir, log)
         failed = False
     finally:
         if failed and os.path.isdir(addon_output_dir):
