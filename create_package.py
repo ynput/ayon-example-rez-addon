@@ -248,6 +248,10 @@ def copy_frontend_content(addon_output_dir: str, current_dir: str, log: logging.
         safe_copy_file(src_path, os.path.join(addon_output_dir, dst_path))
 
 
+def _get_client_code_path(current_dir: str):
+    return os.path.join(current_dir, "client", ADDON_CLIENT_DIR)
+
+
 def _get_client_zip_content(current_dir: str, log: logging.Logger):
     """
 
@@ -260,21 +264,13 @@ def _get_client_zip_content(current_dir: str, log: logging.Logger):
             path is relative to expected output directory.
     """
 
-    client_dir: str = os.path.join(current_dir, "client")
-    if not os.path.isdir(client_dir):
-        raise RuntimeError("Client directory was not found.")
 
     log.info("Preparing client code zip")
 
     output: list[tuple[str, str]] = []
 
-    # TODO: push/update version in client code
-    # src_version_path: str = os.path.join(current_dir, "version.py")
-    # dst_version_path: str = os.path.join(ADDON_CLIENT_DIR, "version.py")
-    # output.append((src_version_path, dst_version_path))
-
     # Add client code content to zip
-    client_code_dir: str = os.path.join(client_dir, ADDON_CLIENT_DIR)
+    client_code_dir: str = _get_client_code_path(current_dir)
     for path, sub_path in find_files_in_subdir(client_code_dir):
         output.append((path, os.path.join(ADDON_CLIENT_DIR, sub_path)))
     return output
@@ -289,10 +285,11 @@ def zip_client_side(addon_package_dir: str, current_dir: str, log: logging.Logge
         log (logging.Logger): Logger object.
     """
 
-    client_dir: str = os.path.join(current_dir, "client")
-    if not os.path.isdir(client_dir):
-        log.info("Client directory was not found. Skipping")
-        return
+    client_code_dir: str = _get_client_code_path(current_dir)
+    if not os.path.isdir(client_code_dir):
+        raise RuntimeError(
+            f"Client directory was not found '{client_code_dir}'."
+        )
 
     log.info("Preparing client code zip")
     private_dir: str = os.path.join(addon_package_dir, "private")
@@ -308,7 +305,9 @@ def zip_client_side(addon_package_dir: str, current_dir: str, log: logging.Logge
         for path, sub_path in mapping:
             zipf.write(path, sub_path)
 
-    pyproject_path = os.path.join(client_dir, "pyproject.toml")
+    log.info("Client zip created")
+
+    pyproject_path = os.path.join(current_dir, "client", "pyproject.toml")
     if os.path.exists(pyproject_path):
         shutil.copy(pyproject_path, private_dir)
 
@@ -355,6 +354,12 @@ def copy_client_code(current_dir: str, output_dir: str, log: logging.Logger):
         output_dir (str): Directory path to output client code.
         log (logging.Logger): Logger object.
     """
+
+    client_code_dir: str = _get_client_code_path(current_dir)
+    if not os.path.isdir(client_code_dir):
+        raise RuntimeError(
+            f"Client directory '{client_code_dir}' was not found."
+        )
 
     full_output_dir = os.path.join(output_dir, ADDON_CLIENT_DIR)
     if os.path.exists(full_output_dir):
