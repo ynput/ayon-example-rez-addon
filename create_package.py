@@ -31,7 +31,7 @@ import logging
 import collections
 import subprocess
 import zipfile
-from typing import Optional, Iterable, Pattern
+from typing import Optional, Iterable, Pattern, Union
 
 import package
 
@@ -40,7 +40,7 @@ ADDON_VERSION: str = package.version
 
 # Name of folder where client code is located - e.g. 'ayon_maya'
 # Picked from package.py. but it is optional (server only addons don't have it)
-ADDON_CLIENT_DIR: str | None = None
+ADDON_CLIENT_DIR: Union[str, None] = None
 if hasattr(package, "client_dir"):
     ADDON_CLIENT_DIR = package.client_dir
 
